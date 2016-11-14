@@ -9,10 +9,22 @@
       <dd><img src="<%= @photo.photo %>" class="img-responsive"></dd>
 
       <dt>Shop</dt>
-      <dd><%= @photo.shop_id %></dd>
+      <dd>
+        <% if @photo.shop.present? %>
+          <a href="/shops/<%= @photo.shop_id %>">
+            <%= @photo.shop.name %>
+          </a>
+        <% end %>
+      </dd>
 
       <dt>Review</dt>
-      <dd><%= @photo.review_id %></dd>
+      <dd>
+        <% if @photo.review.present? %>
+          <a href="/reviews/<%= @photo.review_id %>">
+            <%= @photo.review.review %>
+          </a>
+        <% end %>
+      </dd>
 
     </dl>
 
