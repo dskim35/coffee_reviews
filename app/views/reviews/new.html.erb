@@ -42,7 +42,7 @@
           Shop
         </label>
 
-        <input type="text" id="shop_id" name="shop_id" placeholder="Shop" class="form-control" value="<%= @review.shop_id %>">
+        <%= select_tag(:shop_id, options_from_collection_for_select(Shop.all, :id, :name, @review.shop_id), :class => "form-control") %>
       </div>
 
       <!-- Label and input for user_id -->
