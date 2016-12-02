@@ -9,17 +9,19 @@
   <div class="col-md-12">
     <table class="table table-striped table-hover">
       <tr>
+        <th>Image url</th>
         <th>Email</th>
         <th>Password</th>
-        <th>Image url</th>
+        <th>Username</th>
         <th>Actions</th>
       </tr>
 
       <% @users.each do |user| %>
       <tr>
+        <td><%= user.image_url %></td>
         <td><%= user.email %></td>
         <td><%= user.password %></td>
-        <td><%= user.image_url %></td>
+        <td><%= user.username %></td>
         <td>
           <a href="/users/<%= user.id %>" class="btn btn-primary">Show</a>
         </td>

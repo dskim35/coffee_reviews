@@ -1,6 +1,7 @@
 class PhotosController < ApplicationController
   def index
-    @photos = Photo.page(params[:page])
+    @q = Photo.ransack(params[:q])
+    @photos = @q.result(:distinct => true).includes(:shop, :review).page(params[:page]).per(10)
 
     render("photos/index.html.erb")
   end
@@ -27,7 +28,14 @@ class PhotosController < ApplicationController
     save_status = @photo.save
 
     if save_status == true
-      redirect_to("/photos/#{@photo.id}", :notice => "Photo created successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/photos/new", "/create_photo"
+        redirect_to("/photos")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Photo created successfully.")
+      end
     else
       render("photos/new.html.erb")
     end
@@ -49,7 +57,14 @@ class PhotosController < ApplicationController
     save_status = @photo.save
 
     if save_status == true
-      redirect_to("/photos/#{@photo.id}", :notice => "Photo updated successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/photos/#{@photo.id}/edit", "/update_photo"
+        redirect_to("/photos/#{@photo.id}", :notice => "Photo updated successfully.")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Photo updated successfully.")
+      end
     else
       render("photos/edit.html.erb")
     end
@@ -63,7 +78,7 @@ class PhotosController < ApplicationController
     if URI(request.referer).path == "/photos/#{@photo.id}"
       redirect_to("/", :notice => "Photo deleted.")
     else
-      redirect_to(:back, :notice => "Photo deleted.")
+      redirect_back(:fallback_location => "/", :notice => "Photo deleted.")
     end
   end
 end

@@ -10,7 +10,8 @@ class ReviewsController < ApplicationController
   end
 
   def index
-    @reviews = Review.page(params[:page])
+    @q = Review.ransack(params[:q])
+    @reviews = @q.result(:distinct => true).includes(:shop, :user, :photos).page(params[:page]).per(10)
 
     render("reviews/index.html.erb")
   end
@@ -39,7 +40,14 @@ class ReviewsController < ApplicationController
     save_status = @review.save
 
     if save_status == true
-      redirect_to("/reviews/#{@review.id}", :notice => "Review created successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/reviews/new", "/create_review"
+        redirect_to("/reviews")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Review created successfully.")
+      end
     else
       render("reviews/new.html.erb")
     end
@@ -62,7 +70,14 @@ class ReviewsController < ApplicationController
     save_status = @review.save
 
     if save_status == true
-      redirect_to("/reviews/#{@review.id}", :notice => "Review updated successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/reviews/#{@review.id}/edit", "/update_review"
+        redirect_to("/reviews/#{@review.id}", :notice => "Review updated successfully.")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Review updated successfully.")
+      end
     else
       render("reviews/edit.html.erb")
     end
@@ -76,7 +91,7 @@ class ReviewsController < ApplicationController
     if URI(request.referer).path == "/reviews/#{@review.id}"
       redirect_to("/", :notice => "Review deleted.")
     else
-      redirect_to(:back, :notice => "Review deleted.")
+      redirect_back(:fallback_location => "/", :notice => "Review deleted.")
     end
   end
 end

@@ -1,6 +1,7 @@
 class ShopsController < ApplicationController
   def index
-    @shops = Shop.page(params[:page])
+    @q = Shop.ransack(params[:q])
+    @shops = @q.result(:distinct => true).includes(:reviews, :photos).page(params[:page]).per(10)
 
     render("shops/index.html.erb")
   end
@@ -29,7 +30,14 @@ class ShopsController < ApplicationController
     save_status = @shop.save
 
     if save_status == true
-      redirect_to("/shops/#{@shop.id}", :notice => "Shop created successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/shops/new", "/create_shop"
+        redirect_to("/shops")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Shop created successfully.")
+      end
     else
       render("shops/new.html.erb")
     end
@@ -51,7 +59,14 @@ class ShopsController < ApplicationController
     save_status = @shop.save
 
     if save_status == true
-      redirect_to("/shops/#{@shop.id}", :notice => "Shop updated successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/shops/#{@shop.id}/edit", "/update_shop"
+        redirect_to("/shops/#{@shop.id}", :notice => "Shop updated successfully.")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Shop updated successfully.")
+      end
     else
       render("shops/edit.html.erb")
     end
@@ -65,7 +80,7 @@ class ShopsController < ApplicationController
     if URI(request.referer).path == "/shops/#{@shop.id}"
       redirect_to("/", :notice => "Shop deleted.")
     else
-      redirect_to(:back, :notice => "Shop deleted.")
+      redirect_back(:fallback_location => "/", :notice => "Shop deleted.")
     end
   end
 end
